@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Earn App</title>
+
+  <style>
+    body {
+      margin:0;
+      font-family: Arial;
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .card {
+      background:white;
+      padding:25px;
+      border-radius:15px;
+      width:90%;
+      max-width:350px;
+      text-align:center;
+    }
+
+    input {
+      width:100%;
+      padding:12px;
+      margin:8px 0;
+      border-radius:10px;
+      border:1px solid #ccc;
+    }
+
+    button {
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:none;
+      border-radius:10px;
+      background:#667eea;
+      color:white;
+      font-weight:bold;
+    }
+
+    .lang {
+      margin-bottom:10px;
+      font-size:14px;
+      cursor:pointer;
+      color:#667eea;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="lang" onclick="switchLang()">🌐 Language</div>
+
+  <h2 id="title">Login / Signup</h2>
+
+  <input id="phone" placeholder="Phone Number (+959...)">
+  <div id="recaptcha"></div>
+
+  <button onclick="sendOTP()" id="sendBtn">Send OTP</button>
+
+  <input id="otp" placeholder="Enter OTP">
+  <button onclick="verifyOTP()" id="verifyBtn">Verify & Login</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+
+import {
+  getAuth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+/* CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyCFxPhQdolhryCMuUFJsStBzwDedwM9HzI",
+  authDomain: "video-earn-app-d8290.firebaseapp.com",
+  projectId: "video-earn-app-d8290"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* LANGUAGE */
+let lang = "en";
+
+window.switchLang = function(){
+  if(lang == "en"){
+    lang = "mm";
+    document.getElementById("title").innerText = "ဝင်ရန် / အကောင့်ဖွင့်ရန်";
+    document.getElementById("sendBtn").innerText = "OTP ပို့မည်";
+    document.getElementById("verifyBtn").innerText = "အတည်ပြုမည်";
+  }else{
+    lang = "en";
+    document.getElementById("title").innerText = "Login / Signup";
+    document.getElementById("sendBtn").innerText = "Send OTP";
+    document.getElementById("verifyBtn").innerText = "Verify & Login";
+  }
+}
+
+/* RECAPTCHA */
+window.recaptchaVerifier = new RecaptchaVerifier(auth,'recaptcha',{
+  size:'normal'
+});
+
+/* SEND OTP */
+window.sendOTP = async function(){
+  let phone = document.getElementById("phone").value;
+
+  try{
+    let confirmation = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+    window.confirmationResult = confirmation;
+    alert("OTP Sent!");
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+/* VERIFY OTP */
+window.verifyOTP = async function(){
+  let code = document.getElementById("otp").value;
+
+  try{
+    await window.confirmationResult.confirm(code);
+    alert("Login Success!");
+  }catch(e){
+    alert("Wrong OTP");
+  }
+}
+
+</script>
+
+</body>
+</html>
